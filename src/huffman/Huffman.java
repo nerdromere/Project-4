@@ -62,6 +62,7 @@ public class Huffman
                 textFileName = args[0];
         }
         Huffman coder = new Huffman();
+        textFileName="alice.txt";
         if(!decode)
             coder.encode(textFileName);
         else
@@ -75,7 +76,28 @@ public class Huffman
     public void encode(String fileName)
     {
       // YOUR CODE HERE
-
+        File input = new File(fileName);
+        Scanner fileInputScanner;
+        int[] list=new int[128];
+        int size=0;
+        try
+        {
+           fileInputScanner = new Scanner(input);
+           while(fileInputScanner.hasNextLine())
+           {
+               char[] oneLine = (fileInputScanner.nextLine()+"\n").toCharArray();
+               
+               for(char c : oneLine){
+                   list[c]++;
+                   size++;
+               }
+           }
+           for(int i=0;i<list.length;i++){
+               System.out.println(i+" "+1.0*list[i]/size);
+           }
+       }catch(IOException e){
+           System.out.println("Something about your file is borked");
+       }
 
 
         writeEncodedFile(byteArray, fileName);
