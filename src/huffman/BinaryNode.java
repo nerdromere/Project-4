@@ -1,6 +1,6 @@
 /*
  * BinaryNode.java
- *
+ * THISA TEST
  * Created on May 21, 2007, 1:08 PM
  */
 
