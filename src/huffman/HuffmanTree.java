@@ -35,9 +35,17 @@ public class HuffmanTree<T extends Comparable<? super T>>
     public HuffmanTree(HuffmanData<T>[] dataArray) 
     {
         // your code here
-
-
-
+        //testing
+        for(int i = 0; i < dataArray.length; i++) {
+            System.out.println(dataArray[i].getData() + " occured " +
+                    dataArray[i].getOccurances() + " times");
+        }
+        
+        //constructing tree -- not finished
+        for(int i = 0; i < dataArray.length - 2; i += 2) {
+            if(dataArray[i].compareTo(dataArray[i + 1]) < 0)
+                this.setRootData(new HuffmanData<T>(null));
+        }
         
          keyMap = new TreeMap<String, T>();
          codeMap = new TreeMap<T, String>();
