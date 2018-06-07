@@ -93,7 +93,7 @@ public class Huffman
                }
            }
            for(int i=0;i<list.length;i++){
-               System.out.println(i+" "+1.0*list[i]/size);
+               System.out.println(i + " " + 100.0 * list[i] / size);
            }
        }catch(IOException e){
            System.out.println("Something about your file is borked");
