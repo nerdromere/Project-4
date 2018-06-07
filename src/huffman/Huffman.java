@@ -5,16 +5,16 @@ package huffman;
  *
  * Created on May 21, 2007, 1:01 PM
  */
-
 import java.util.*;
 import java.lang.*;
 import java.io.*;
+
 /**
  *
  * @author pbladek
  */
-public class Huffman
-{  
+public class Huffman {
+
     public static final int CHARMAX = 128;
     public static final byte CHARBITS = 7;
     public static final short CHARBITMAX = 128;
@@ -24,18 +24,19 @@ public class Huffman
     private SortedMap<String, Character> codeMap;
     HuffmanChar[] charCountArray;
     byte[] saveDataArray;
-    
+
     /**
      * Creates a new instance of Main
      */
-    public Huffman() {}
-    
+    public Huffman() {
+    }
+
     /**
      * main
+     *
      * @param args the command line arguments
      */
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
 //----------------------------------------------------
 // used for debugging encoding
 //----------------------------------------------------
@@ -50,88 +51,98 @@ public class Huffman
 //----------------------------------------------------        
         boolean decode = false;
         String textFileName = "";
-        if(args.length > 0)
-        {
-            if(args[0].substring(0,2).toLowerCase().equals("-d"))
-            {
+        if (args.length > 0) {
+            if (args[0].substring(0, 2).toLowerCase().equals("-d")) {
                 decode = true;
-                if(args.length > 1)
+                if (args.length > 1) {
                     textFileName = args[1];
-            }
-            else
+                }
+            } else {
                 textFileName = args[0];
+            }
         }
         Huffman coder = new Huffman();
-        textFileName="alice.txt";
-        if(!decode)
+        textFileName = "alice.txt";
+        if (!decode) {
             coder.encode(textFileName);
-        else
+        } else {
             coder.decode(textFileName);
+        }
     }
 
     /*
      * encode
      * @param fileName the file to encode
      */
-    public void encode(String fileName)
-    {
-      // YOUR CODE HERE
+    public void encode(String fileName) {
+        // YOUR CODE HERE
         File input = new File(fileName);
         Scanner fileInputScanner;
-        int[] list=new int[128];
-        int size=0;
-        try
-        {
-           fileInputScanner = new Scanner(input);
-           while(fileInputScanner.hasNextLine())
-           {
-               char[] oneLine = (fileInputScanner.nextLine()+"\n").toCharArray();
-               
-               for(char c : oneLine){
-                   list[c]++;
-                   size++;
-               }
-           }
-           for(int i=0;i<list.length;i++){
-               System.out.println(i + " " + 100.0 * list[i] / size);
-           }
-       }catch(IOException e){
-           System.out.println("Something about your file is borked");
-       }
+        int[] list = new int[CHARMAX];
+        int size = 0;
+        try {
+            fileInputScanner = new Scanner(input);
+            while (fileInputScanner.hasNextLine()) {
+                char[] oneLine = (fileInputScanner.nextLine() + "\n").toCharArray();
+                for (char c : oneLine) {
+                    list[c]++;
+                }
+                size += oneLine.length;
+            }
+            for (int i = 0; i < list.length; i++) {
+                System.out.println(i + " " + (char) i + " " + 100.0 * list[i] / size);
+                //System.out.println(i + " " + (char) i  + " " + list[i]);
+            }
 
+            //saving what we just got into an array containing character and occurence
+            charCountArray = new HuffmanChar[CHARMAX];
+            for (int i = 0; i < CHARMAX; i++) {
+                charCountArray[i] = new HuffmanChar((char) i, list[i]);
+            }
+            //sorting array
+            Arrays.sort(charCountArray);
 
+            //testing
+            for (int i = 0; i < charCountArray.length; i++) {
+                System.out.println(charCountArray[i].toString());
+            }
+            /*
+             By now we have an array of HuffmanChar's which contain a 
+             character and its reoccurences
+             */
+            theTree = new HuffmanTree(charCountArray);
+        } catch (IOException e) {
+            System.out.println("Something about your file is borked");
+        }
         writeEncodedFile(byteArray, fileName);
         writeKeyFile(fileName);
-    } 
- 
+    }
+
     /*
      * decode
      * @param inFileName the file to decode
-     */   
-    public void decode(String inFileName)
-    { 
-     
+     */
+    public void decode(String inFileName) {
+
     }
-      
+
     /**
      * writeEncodedFile
+     *
      * @param bytes bytes for file
      * @param fileName file input
-     */ 
-    public void writeEncodedFile(byte[] bytes, String fileName)
-    {
-      
+     */
+    public void writeEncodedFile(byte[] bytes, String fileName) {
 
     }
-   
+
     /**
      * writeKeyFile
+     *
      * @param fileName the name of the file to write to
      */
-    public void writeKeyFile(String fileName)
-    {
-  
-    }
- 
-}
+    public void writeKeyFile(String fileName) {
 
+    }
+
+}
