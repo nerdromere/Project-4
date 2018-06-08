@@ -110,6 +110,17 @@ public class Huffman {
              By now we have an array of HuffmanChar's which contain a 
              character and its reoccurences
              */
+            
+            /*Change the charCountArray to size 8, comment the loop which initializes the array,
+            and uncomment this below for smaller test*/
+//            charCountArray[0] = new HuffmanChar('a', 2);
+//            charCountArray[1] = new HuffmanChar('b', 3);
+//            charCountArray[2] = new HuffmanChar('c', 7);
+//            charCountArray[3] = new HuffmanChar('d', 10);
+//            charCountArray[4] = new HuffmanChar('f', 15);
+//            charCountArray[5] = new HuffmanChar('k', 21);
+//            charCountArray[6] = new HuffmanChar('l', 50);
+//            charCountArray[7] = new HuffmanChar('m', 70);
             theTree = new HuffmanTree(charCountArray);
         } catch (IOException e) {
             System.out.println("Something about your file is borked");
