@@ -56,6 +56,7 @@ public class HuffmanTree<T extends Comparable<? super T>>
             //takes off two lowest and adds to temp
             temp.setLeftChild(nodes[i]);
             temp.setRightChild(nodes[i + 1]);
+            leafCount += 2;
             //just get rid of the the i'th node just for organizational purposes
             nodes[i] = null;
             nodes[i + 1] = null;
@@ -76,11 +77,33 @@ public class HuffmanTree<T extends Comparable<? super T>>
         this.setRootNode(nodes[nodes.length - 1]);
         //hell yeah! got the HuffmanTree working, now just character representation
         //now the HuffmanTree contains a root node which contatins everything else.
+        
         keyMap = new TreeMap<String, T>();
-        codeMap = new TreeMap<T, String>();
+        codeMap = new TreeMap<T,String>();
         setMaps(getRootNode(), "");
     }
     
+     /** 
+      * set up the 2 maps
+      * @param node
+      * @param codeString
+      */
+     private void setMaps(BinaryNodeInterface<HuffmanData<T>> node,
+             String codeString)
+     { 
+         if(node.hasLeftChild()){
+            setMaps(node.getLeftChild(), codeString + "0");
+         }
+         if(node.hasRightChild()) {
+            setMaps(node.getRightChild(), codeString + "1");
+         }
+         if(node.isLeaf()) {
+            keyMap.put(codeString, node.getData().getData());
+            codeMap.put(node.getData().getData(), codeString);
+            System.out.println(node.getData().getData() + " is " + codeString);
+            codeString = codeString.substring(0, codeString.length() - 1);
+         }
+     }
     /** 
      * creates two new HuffmanTrees and adds them to the root of this tree
      * @param left 
@@ -106,7 +129,6 @@ public class HuffmanTree<T extends Comparable<? super T>>
      */
     private void firstAdd(HuffmanData<T> element1, HuffmanData<T> element2)
     {
-        
 
     }
     
@@ -119,18 +141,6 @@ public class HuffmanTree<T extends Comparable<? super T>>
      {
 
        
-     }
-    
-     /** 
-      * set up the 2 maps
-      * @param node
-      * @param codeString
-      */
-     private void setMaps(BinaryNodeInterface<HuffmanData<T>> node,
-             String codeString)
-     { 
-         
-              
      }
     
     /*
