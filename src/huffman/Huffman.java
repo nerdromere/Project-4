@@ -6,7 +6,6 @@ package huffman;
  * Created on May 21, 2007, 1:01 PM
  */
 import java.util.*;
-import java.lang.*;
 import java.io.*;
 
 /**
@@ -79,7 +78,7 @@ public class Huffman {
         File input = new File(fileName);
         Scanner fileInputScanner;
         int[] list = new int[CHARMAX];
-        int size = 0;
+        long size = 0;
         try {
             fileInputScanner = new Scanner(input);
             while (fileInputScanner.hasNextLine()) {
@@ -89,11 +88,17 @@ public class Huffman {
                 }
                 size += oneLine.length;
             }
+            
+            size *= 8; //convert to bits
+            /*            
+            //testing
+            
             for (int i = 0; i < list.length; i++) {
                 System.out.println(i + " " + (char) i + " " + 100.0 * list[i] / size);
                 //System.out.println(i + " " + (char) i  + " " + list[i]);
             }
-
+            */
+            
             //saving what we just got into an array containing character and occurence
             charCountArray = new HuffmanChar[CHARMAX];
             for (int i = 0; i < CHARMAX; i++) {
@@ -101,18 +106,18 @@ public class Huffman {
             }
             //sorting array
             Arrays.sort(charCountArray);
-
+            
+            /*
             //testing
             for (int i = 0; i < charCountArray.length; i++) {
                 System.out.println(charCountArray[i].toString());
             }
+            */
             /*
              By now we have an array of HuffmanChar's which contain a 
              character and its reoccurences
              */
-            
-            /*Change the charCountArray to size 8, comment the loop which initializes the array,
-            and uncomment this below for smaller test*/
+            /*Change the charCountArray to size 8 and uncomment this below for smaller test*/
 //            charCountArray[0] = new HuffmanChar('a', 2);
 //            charCountArray[1] = new HuffmanChar('b', 3);
 //            charCountArray[2] = new HuffmanChar('c', 7);
@@ -122,6 +127,22 @@ public class Huffman {
 //            charCountArray[6] = new HuffmanChar('l', 50);
 //            charCountArray[7] = new HuffmanChar('m', 70);
             theTree = new HuffmanTree(charCountArray);
+            SortedMap<Character, String> keyMap = theTree.getCodeMap();
+            //so now we have ahuffman tree and two maps with a path and a character
+            StringBuilder sb = new StringBuilder();
+            fileInputScanner = new Scanner(input);
+            long amountCompressed = 0;
+            while (fileInputScanner.hasNextLine()) {
+                char[] oneLine = (fileInputScanner.nextLine() + "\n").toCharArray();
+                for (char c : oneLine) {
+                    sb.append(keyMap.get(c));
+                    amountCompressed += keyMap.get(c).length();
+                }   
+            }
+            System.out.println(sb);
+            System.out.println(size + " - Amount of bites in original");
+            System.out.println(amountCompressed + " - Amount of bites in compressed file");
+            System.out.println(100.0 * amountCompressed / size + " percentage");
         } catch (IOException e) {
             System.out.println("Something about your file is borked");
         }
@@ -144,7 +165,7 @@ public class Huffman {
      * @param fileName file input
      */
     public void writeEncodedFile(byte[] bytes, String fileName) {
-
+        //File new = new File(fileName);
     }
 
     /**
