@@ -129,6 +129,8 @@ public class Huffman {
             theTree = new HuffmanTree(charCountArray);
             SortedMap<Character, String> keyMap = theTree.getCodeMap();
             //so now we have ahuffman tree and two maps with a path and a character
+            
+            //I believe this is now what we use to encode our file
             StringBuilder sb = new StringBuilder();
             fileInputScanner = new Scanner(input);
             long amountCompressed = 0;
@@ -137,8 +139,9 @@ public class Huffman {
                 for (char c : oneLine) {
                     sb.append(keyMap.get(c));
                     amountCompressed += keyMap.get(c).length();
-                }   
+                }
             }
+            byteArray=sb.toString().getBytes();
             System.out.println(sb);
             System.out.println(size + " - Amount of bites in original");
             System.out.println(amountCompressed + " - Amount of bites in compressed file");
@@ -147,7 +150,7 @@ public class Huffman {
             System.out.println("Something about your file is borked");
         }
         writeEncodedFile(byteArray, fileName);
-        writeKeyFile(fileName);
+        writeKeyFile(fileName,list);
     }
 
     /*
@@ -165,7 +168,13 @@ public class Huffman {
      * @param fileName file input
      */
     public void writeEncodedFile(byte[] bytes, String fileName) {
-        //File new = new File(fileName);
+        //I hope your file doesn't have multiple periods
+        try (FileOutputStream output = new FileOutputStream(fileName.split("\\.")[0]+".huf")) {
+            output.write(bytes);
+            output.close();
+        }catch(IOException e){
+            
+        }
     }
 
     /**
@@ -173,8 +182,21 @@ public class Huffman {
      *
      * @param fileName the name of the file to write to
      */
-    public void writeKeyFile(String fileName) {
-
+    public void writeKeyFile(String fileName, int[] list) {
+           //I hope your file doesn't have multiple periods
+        try (FileOutputStream output = new FileOutputStream(fileName.split("\\.")[0]+".huf")) {
+            byte[] listArray=new byte[list.length*3];
+            for(int i=0;i<list.length;i++){
+                listArray[i*3]=(byte)i;//first byte is the character
+                listArray[i*3+1]=(byte)list[i];//second byte is the first half of the int
+                listArray[i*3+2]=(byte)(list[i] >> 8);//this shifts the integer 
+                //over bitwise, deleting half the bits and accessing the other half
+            }
+            output.write(listArray);
+            output.close();
+        }catch(IOException e){
+            
+        }
     }
 
 }
