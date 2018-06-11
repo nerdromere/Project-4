@@ -36,8 +36,9 @@ public class  BinaryNode < T > implements BinaryNodeInterface < T >, Serializabl
 
     /**
      * constructor
-     * @param leftChild
-     * @param rightChild
+     * @param leftChild left child
+     * @param rightChild right child
+     * @param dataPortion data
      */
     public BinaryNode (T dataPortion, BinaryNode < T > leftChild, BinaryNode < T > rightChild)
     {
