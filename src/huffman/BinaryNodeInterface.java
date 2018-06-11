@@ -49,7 +49,7 @@ interface BinaryNodeInterface< T >
     public boolean isLeaf ();
     
     /** Task: Counts the nodes in the subtree rooted at this node.
-    *@returnthenumberof nodes in the subtree rooted at this node */
+    *@return thenumberof nodes in the subtree rooted at this node */
     public int getNumberOfNodes ();
     
     /** Task: Computes the height of the subtree rooted at this node.
