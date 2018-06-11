@@ -25,7 +25,7 @@ public class Huffman {
     private SortedMap<String, Character> codeMap;
     HuffmanChar[] charCountArray;
     byte[] saveDataArray;
-    int byteLength;
+    long byteLength;
 
     /**
      * Creates a new instance of Main
@@ -56,15 +56,20 @@ public class Huffman {
         if (args.length > 0) {
             if (args[0].substring(0, 2).toLowerCase().equals("-d")) {
                 decode = true;
-                if (args.length > 1) {
-                    textFileName = args[1];
-                }
             } else {
                 textFileName = args[0];
             }
         }
+        if (args.length > 1) {
+            textFileName = args[1];
+
+        }
+
+        while (!(new File(textFileName)).exists()) {
+            System.out.print("File not found, enter different: ");
+            textFileName = (new Scanner(System.in)).nextLine();
+        }
         Huffman coder = new Huffman();
-        textFileName = "alice.txt";
         if (!decode) {
             coder.encode(textFileName);
         } else {
@@ -82,6 +87,7 @@ public class Huffman {
         Scanner fileInputScanner;
         int[] list = new int[CHARMAX];
         long size = 0;
+        StringBuilder sb = new StringBuilder();
         try {
             fileInputScanner = new Scanner(input);
             while (fileInputScanner.hasNextLine()) {
@@ -91,17 +97,9 @@ public class Huffman {
                 }
                 size += oneLine.length;
             }
-            
+
             size *= 8; //convert to bits
-            /*            
-            //testing
-            
-            for (int i = 0; i < list.length; i++) {
-                System.out.println(i + " " + (char) i + " " + 100.0 * list[i] / size);
-                //System.out.println(i + " " + (char) i  + " " + list[i]);
-            }
-            */
-            
+
             //saving what we just got into an array containing character and occurence
             charCountArray = new HuffmanChar[CHARMAX];
             for (int i = 0; i < CHARMAX; i++) {
@@ -109,32 +107,16 @@ public class Huffman {
             }
             //sorting array
             Arrays.sort(charCountArray);
-            
-            /*
-            //testing
-            for (int i = 0; i < charCountArray.length; i++) {
-                System.out.println(charCountArray[i].toString());
-            }
-            */
+
             /*
              By now we have an array of HuffmanChar's which contain a 
              character and its reoccurences
              */
-            /*Change the charCountArray to size 8 and uncomment this below for smaller test*/
-//            charCountArray[0] = new HuffmanChar('a', 2);
-//            charCountArray[1] = new HuffmanChar('b', 3);
-//            charCountArray[2] = new HuffmanChar('c', 7);
-//            charCountArray[3] = new HuffmanChar('d', 10);
-//            charCountArray[4] = new HuffmanChar('f', 15);
-//            charCountArray[5] = new HuffmanChar('k', 21);
-//            charCountArray[6] = new HuffmanChar('l', 50);
-//            charCountArray[7] = new HuffmanChar('m', 70);
             theTree = new HuffmanTree(charCountArray);
-            SortedMap<Character, String> keyMap = theTree.getCodeMap();
+            keyMap = theTree.getCodeMap();
             //so now we have ahuffman tree and two maps with a path and a character
-            
+
             //I believe this is now what we use to encode our file
-            StringBuilder sb = new StringBuilder();
             fileInputScanner = new Scanner(input);
             int amountCompressed = 0;
             while (fileInputScanner.hasNextLine()) {
@@ -144,17 +126,17 @@ public class Huffman {
                     amountCompressed += keyMap.get(c).length();
                 }
             }
-            byteArray = new byte[amountCompressed / 8 + 1];
+            byteArray = new byte[amountCompressed / 7];
+            byteLength = amountCompressed / 7;
             int track = 0;
-            
+
             //created the byte array with numbers which will represent the path
-            while(track < byteArray.length) {
-                byteArray[track] = Byte.parseByte(sb.substring(track * 
-                        CHARBITS, (track + 1) * CHARBITS), 2);
+            while (track < byteArray.length) {
+                byteArray[track] = Byte.parseByte(sb.substring(track
+                        * CHARBITS, (track + 1) * CHARBITS), 2);
                 //System.out.println(byteArray[track]);
                 track++;
             }
-            //System.out.println(sb);
             System.out.println(size + " - Amount of bites in original");
             System.out.println(amountCompressed + " - Amount of bites in compressed file");
             System.out.println(100.0 * amountCompressed / size + " percentage");
@@ -162,54 +144,75 @@ public class Huffman {
             System.out.println("Something about your file is borked");
         }
         writeEncodedFile(byteArray, fileName);
-        writeKeyFile(fileName,list);
-        System.out.println(Arrays.toString(list));
-        decode("alice.txt");
+        writeKeyFile(fileName, list);
+//        System.out.println(Arrays.toString(list));
+//        System.out.println(sb.substring(0, 100));
     }
 
     /*
      * decode
      * @param inFileName the file to decode
      */
-    public void decode(String inFileName) {
+    public <T> void decode(String inFileName) {
         FileInputStream encoded = null;
         int[] list = new int[CHARMAX];
         try {
-            encoded = new FileInputStream(new File(inFileName.split("\\.")[0]+".cod"));
+            encoded = new FileInputStream(new File(inFileName.split("\\.")[0] + ".cod"));
             int place = 0;
-            int occurances = 0;
-            while(encoded.available() != 0) {
-                System.out.print(place = encoded.read());
-                byte one = (byte)encoded.read();
-                byte two = (byte)encoded.read();
-                System.out.print(" " + one);
-                System.out.print(" " + two);
-                System.out.print(" or " + (occurances = (Integer.parseInt(properBinary(two) + properBinary(one), 2))) + "\n");
-                list[place] = occurances;
+            while (encoded.available() != 0) {
+                place = encoded.read();
+                byte one = (byte) encoded.read();
+                byte two = (byte) encoded.read();
+                list[place] = (Integer.parseInt(properBinary(two) + properBinary(one), 2));
             }
             //created 
             charCountArray = new HuffmanChar[CHARMAX];
             for (int i = 0; i < CHARMAX; i++) {
                 charCountArray[i] = new HuffmanChar((char) i, list[i]);
             }
-           theTree = new HuffmanTree();
-           //now we have  ahuffman tree and need to find characters based
-           //on the path of the 0s and 1s from the encoded file
-           encoded = new FileInputStream(new File(inFileName.split("\\.")[0]+".huf"));
-           byte[] encodedString = new byte[byteLength];
-           int track = 0;
-           while(encoded.available() != 0) {
-               int temp = encoded.read();
-               encodedString[track + 3] = (byte)temp;
-               encodedString[track + 2] = (byte)(temp = temp >> 8);
-               encodedString[track + 1] = (byte)(temp = temp >> 8);
-               encodedString[track] = (byte)(temp = temp >> 8);
+            Arrays.sort(charCountArray);
+            theTree = new HuffmanTree(charCountArray);
+            //now we have  ahuffman tree and need to find characters based
+            //on the path of the 0s and 1s from the encoded file
+            encoded = new FileInputStream(new File(inFileName.split("\\.")[0] + ".huf"));
+            byteLength = encoded.available();
+            byte[] encodedString = new byte[encoded.available()];
+            int track = 0;
+            while (encoded.available() != 0) {
+                encodedString[track++] = (byte) encoded.read();
             }
-           int atByte = 0;
-           int atPos = 0;
-           while(atByte < byteLength) {
-               
-           }
+            PrintWriter out = new PrintWriter(new File(inFileName.split("\\.")[0] + "x.txt"));
+            int atByte = 0;
+            int atBit = 0;
+            StringBuilder lineOfText = new StringBuilder();
+            while (atByte < byteLength) {
+                BinaryNodeInterface<HuffmanData<Character>> temp = theTree.getRootNode();
+                while (!temp.isLeaf()) {
+                    boolean way = getDirection(encodedString, atByte, atBit);
+                    if (lineOfText.toString().endsWith("After that,' continued")) {
+                        atByte = atByte;
+                    }
+                    if (way) {
+                        temp = temp.getRightChild();
+                    } else {
+                        temp = temp.getLeftChild();
+                    }
+                    atBit++;
+                    if (atBit == 7) {
+                        atBit = 0;
+                        atByte++;
+                    }
+                }
+
+                if (temp.getData().getData().equals('\n')) {
+                    //System.out.println(lineOfText);
+                    out.println(lineOfText);
+                    lineOfText.setLength(0);
+                } else {
+                    lineOfText.append(temp.getData().getData());
+                }
+            }
+            out.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Huffman.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -218,25 +221,37 @@ public class Huffman {
     }
 
     /**
+     *
+     * @param bytes
+     * @param bytePosition
+     * @param bitPosition
+     * @return
+     */
+    private boolean getDirection(byte[] bytes, int bytePosition, int bitPosition) {
+        return ((bytes[bytePosition] >> (6 - bitPosition)) & 1) == 1;
+    }
+
+    /**
      * Adds the two bytes to form the amount
-     * @param num   int to get path
-     * @return  path
+     *
+     * @param num int to get path
+     * @return path
      */
     private static String properBinary(int num) {
         String temp = "";
         temp = Integer.toBinaryString(num);
-        if(num < 0) {
+        if (num < 0) {
             temp = temp.substring(24);
         }
-        if(temp.length() < 8) {
+        if (temp.length() < 8) {
             int initial = temp.length();
-            for(int i = 0; i < 8 - initial; i++) {
+            for (int i = 0; i < 8 - initial; i++) {
                 temp = "0" + temp;
             }
         }
         return temp;
     }
-    
+
     /**
      * writeEncodedFile
      *
@@ -245,13 +260,13 @@ public class Huffman {
      */
     public void writeEncodedFile(byte[] bytes, String fileName) {
         //I hope your file doesn't have multiple periods
-        byteLength = bytes.length;
+        //byteLength = bytes.length;
         System.out.println(bytes.length + " is length");
-        try (FileOutputStream output = new FileOutputStream(fileName.split("\\.")[0]+".huf")) {
+        try (FileOutputStream output = new FileOutputStream(fileName.split("\\.")[0] + ".huf")) {
             output.write(bytes);
             output.close();
-        }catch(IOException e){
-            
+        } catch (IOException e) {
+
         }
     }
 
@@ -259,22 +274,24 @@ public class Huffman {
      * writeKeyFile
      *
      * @param fileName the name of the file to write to
+     * @param list the list of occurances
      */
     public void writeKeyFile(String fileName, int[] list) {
-           //I hope your file doesn't have multiple periods
-        try (FileOutputStream output = new FileOutputStream(fileName.split("\\.")[0]+".cod")) {
-            byte[] listArray=new byte[list.length * 3];
-            for(int i=0;i<list.length;i++){
-                listArray[i*3]=(byte)i;//first byte is the character
-                listArray[i*3+1]=(byte)list[i];//second byte is the first half of the int
-                listArray[i*3+2]=(byte)(list[i] >> 8);//this shifts the integer 
+        //I hope your file doesn't have multiple periods
+        try (FileOutputStream output = new FileOutputStream(fileName.split("\\.")[0] + ".cod")) {
+            byte[] listArray = new byte[list.length * 3];
+            for (int i = 0; i < list.length; i++) {
+                listArray[i * 3] = (byte) i;//first byte is the character
+                listArray[i * 3 + 1] = (byte) list[i];//second byte is the first half of the int
+                listArray[i * 3 + 2] = (byte) (list[i] >> 8);//this shifts the integer 
                 //over bitwise, deleting half the bits and accessing the other half
-                System.out.println(i + " occured " + list[i] + " times " + (byte)list[i] + " " + (byte)(list[i] >> 8));
+                //System.out.println(i + " occured " + list[i] + " times " + (byte)list[i] + " " + (byte)(list[i] >> 8));
             }
+
             output.write(listArray);
             output.close();
-        }catch(IOException e){
-            
+        } catch (IOException e) {
+
         }
     }
 }
