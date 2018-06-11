@@ -25,6 +25,7 @@ public class Huffman {
     private SortedMap<String, Character> codeMap;
     HuffmanChar[] charCountArray;
     byte[] saveDataArray;
+    int byteLength;
 
     /**
      * Creates a new instance of Main
@@ -163,7 +164,7 @@ public class Huffman {
         writeEncodedFile(byteArray, fileName);
         writeKeyFile(fileName,list);
         System.out.println(Arrays.toString(list));
-        decode("alice.cod");
+        decode("alice.txt");
     }
 
     /*
@@ -172,17 +173,43 @@ public class Huffman {
      */
     public void decode(String inFileName) {
         FileInputStream encoded = null;
-        
+        int[] list = new int[CHARMAX];
         try {
-            encoded = new FileInputStream(new File(inFileName));
+            encoded = new FileInputStream(new File(inFileName.split("\\.")[0]+".cod"));
+            int place = 0;
+            int occurances = 0;
             while(encoded.available() != 0) {
-                System.out.println(encoded.read());
-                Integer one = encoded.read();
-                Integer two = encoded.read();
-                System.out.println(one);
-                System.out.println(two);
-                //System.out.println(Integer.parseInt(Integer.toBinaryString(two) + Integer.toBinaryString(one)));
+                System.out.print(place = encoded.read());
+                byte one = (byte)encoded.read();
+                byte two = (byte)encoded.read();
+                System.out.print(" " + one);
+                System.out.print(" " + two);
+                System.out.print(" or " + (occurances = (Integer.parseInt(properBinary(two) + properBinary(one), 2))) + "\n");
+                list[place] = occurances;
             }
+            //created 
+            charCountArray = new HuffmanChar[CHARMAX];
+            for (int i = 0; i < CHARMAX; i++) {
+                charCountArray[i] = new HuffmanChar((char) i, list[i]);
+            }
+           theTree = new HuffmanTree();
+           //now we have  ahuffman tree and need to find characters based
+           //on the path of the 0s and 1s from the encoded file
+           encoded = new FileInputStream(new File(inFileName.split("\\.")[0]+".huf"));
+           byte[] encodedString = new byte[byteLength];
+           int track = 0;
+           while(encoded.available() != 0) {
+               int temp = encoded.read();
+               encodedString[track + 3] = (byte)temp;
+               encodedString[track + 2] = (byte)(temp = temp >> 8);
+               encodedString[track + 1] = (byte)(temp = temp >> 8);
+               encodedString[track] = (byte)(temp = temp >> 8);
+            }
+           int atByte = 0;
+           int atPos = 0;
+           while(atByte < byteLength) {
+               
+           }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Huffman.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -191,6 +218,26 @@ public class Huffman {
     }
 
     /**
+     * Adds the two bytes to form the amount
+     * @param num   int to get path
+     * @return  path
+     */
+    private static String properBinary(int num) {
+        String temp = "";
+        temp = Integer.toBinaryString(num);
+        if(num < 0) {
+            temp = temp.substring(24);
+        }
+        if(temp.length() < 8) {
+            int initial = temp.length();
+            for(int i = 0; i < 8 - initial; i++) {
+                temp = "0" + temp;
+            }
+        }
+        return temp;
+    }
+    
+    /**
      * writeEncodedFile
      *
      * @param bytes bytes for file
@@ -198,6 +245,7 @@ public class Huffman {
      */
     public void writeEncodedFile(byte[] bytes, String fileName) {
         //I hope your file doesn't have multiple periods
+        byteLength = bytes.length;
         System.out.println(bytes.length + " is length");
         try (FileOutputStream output = new FileOutputStream(fileName.split("\\.")[0]+".huf")) {
             output.write(bytes);
@@ -221,7 +269,7 @@ public class Huffman {
                 listArray[i*3+1]=(byte)list[i];//second byte is the first half of the int
                 listArray[i*3+2]=(byte)(list[i] >> 8);//this shifts the integer 
                 //over bitwise, deleting half the bits and accessing the other half
-                System.out.println((char)i + " occured " + list[i] + " times " + (byte)list[i] + " " + (byte)(list[i] >> 8));
+                System.out.println(i + " occured " + list[i] + " times " + (byte)list[i] + " " + (byte)(list[i] >> 8));
             }
             output.write(listArray);
             output.close();
@@ -229,5 +277,4 @@ public class Huffman {
             
         }
     }
-
 }
