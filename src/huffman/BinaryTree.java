@@ -1,270 +1,163 @@
 /*
- * BinaryTree.java
+ * HuffmanTree.java
  *
- * Created on May 21, 2007, 1:12 PM
+ * Created on May 21, 2007, 2:16 PM
  */
 
 package huffman;
 import java.util.*;
-
 /**
- * @author Carrano
+ * binary tree for Huffman coding
+ * @author pbladek
  */
-public class BinaryTree<T> implements BinaryTreeInterface<T> ,
-    java.io.Serializable
+public class HuffmanTree<T extends Comparable<? super T>>
+        extends BinaryTree<HuffmanData<T>>
 {
-    private BinaryNodeInterface<T> root;
+    private final T MARKER = null;
+    SortedMap<T, String> codeMap;
+    SortedMap<String, T> keyMap;
+    
+    private int leafCount = 0;
     
     /**
-     * default constructor
+     * Creates a new instance of HuffmanTree
      */
-    public BinaryTree ()
+    public HuffmanTree() 
     {
-        root = null;
-    } // end default constructor
-
+        super();
+    }
+   
     /**
-     * constructor
-     * @param rootData data for root node
+     * Creates a new instance of HuffmanTree
+     * from an array of Huffman Data
+     * @param dataArray n array of Huffman Data
      */
-    public BinaryTree (T rootData)
+    public HuffmanTree(HuffmanData<T>[] dataArray) 
     {
-        root = new BinaryNode < T > (rootData);
-    } // end constructor
-
-    /**
-     * constructor
-     * @param rootData data for root node
-     * @param leftTree left subtree to attach
-     * @param leftTree right subtree to attach
-     */
-    public BinaryTree (T rootData, BinaryTree<T> leftTree,
-            BinaryTree<T> rightTree)
-    {
-        privateSetTree (rootData, leftTree, rightTree);
-    } // end constructor
-
-    /**
-     * sets the root node
-     * @param rootData data for root node
-     */
-    public void setTree (T rootData)
-    {
-        root = new BinaryNode < T > (rootData);
-    } // end setTree
-
-    /**
-     * sets the root node
-     * @param rootData data for root node
-     * @param leftTree left subtree to attach
-     * @param leftTree right subtree to attach
-     */
-    public void setTree (T rootData, BinaryTreeInterface < T > leftTree,
-            BinaryTreeInterface < T > rightTree)
-    {
-        privateSetTree (rootData, (BinaryTree < T > ) leftTree,
-                (BinaryTree < T > ) rightTree);
-    } // end setTree
-
-    /**
-     * @return copy of the tree
-     */
-    public BinaryNodeInterface<T> copy ()
-    {
-        BinaryNode < T > newRoot = new BinaryNode <T> (root.getData());
-        if (root.getLeftChild() != null)
-            newRoot.setLeftChild((BinaryNode <T>)root.getLeftChild().copy());
-        if (root.getRightChild() != null)
-            newRoot.setRightChild((BinaryNode <T>)root.getRightChild().copy());
-        return newRoot;
-    } // end copy
-
-    /*
-     * gets the tree height
-     * @return height of tree
-     */
-    public int getHeight()
-    {
-        return root.getHeight();
-    } // end getHeight
-
-    /*
-     * gets the number of nodesw
-     * @return numberOfNodes
-     */
-    public int getNumberOfNodes()
-    {
-        return root.getNumberOfNodes();
-    } // end getNumberOfNodes
- 
-    private void privateSetTree(T rootData, BinaryTree < T > leftTree,
-            BinaryTree < T > rightTree)
-    {
-        root = new BinaryNode < T > (rootData);
-        if ((leftTree != null) && !leftTree.isEmpty ())
-            root.setLeftChild (leftTree.root.copy ());
-        if ((rightTree != null) && !rightTree.isEmpty ())
-            root.setRightChild (rightTree.root.copy ());
-    } // end privateSetTree
-
-
- 
- // alternative version
-//    private void privateSetTree (T rootData, BinaryTree < T > leftTree,
-//            BinaryTree < T > rightTree)
-//    {
-//        root = new BinaryNode < T > (rootData);
-//        if ((leftTree != null) && !leftTree.isEmpty ())
-//            root.setLeftChild (leftTree.root);
-//        if ((rightTree != null) && !rightTree.isEmpty ())
-//        {
-//            if (rightTree != leftTree)
-//                root.setRightChild (rightTree.root);
-//            else
-//                root.setRightChild (rightTree.root.copy ());
-//        } // end if
-//        if ((leftTree != null) && (leftTree != this))
-//            leftTree.clear ();
-//        if ((rightTree != null) && (rightTree != this))
-//            rightTree.clear ();
-//    } // end privateSetTree
- 
-
-
-    public T getRootData ()
-    {
-        T rootData = null;
-        if (root != null)
-            rootData = root.getData ();
-        return rootData;
-    } // end getRootData
-
-
-    public boolean isEmpty ()
-    {
-        return root == null;
-    } // end isEmpty
-
-
-    public void clear ()
-    {
-        root = null;
-    } // end clear
-
-
-    protected void setRootData (T rootData)
-    {
-        root.setData (rootData);
-    } // end setRootData
-
-
-    protected void setRootNode (BinaryNodeInterface < T > rootNode)
-    {
-        root = rootNode;
-    } // end setRootNode
-
-
-    protected BinaryNodeInterface<T> getRootNode ()
-    {
-        return root;
-    } // end getRootNode
-    
-    public void inorderTraverse ()
-    {
-//        StackInterface < BinaryNodeInterface < T >> nodeStack =
-//            new LinkedStack < BinaryNodeInterface < T >> ();
-        Stack< BinaryNodeInterface<T>> nodeStack =
-                new Stack<BinaryNodeInterface<T>>();
-        BinaryNodeInterface < T > currentNode = root;
-        while (!nodeStack.isEmpty () || (currentNode != null))
-        {
-            // find leftmost node with no left child
-            while (currentNode != null)
-            {
-                nodeStack.push (currentNode);
-                currentNode = currentNode.getLeftChild ();
-            } // end while
-            // visit leftmost node, then traverse its right subtree
-            if (!nodeStack.isEmpty ())
-            {
-                BinaryNodeInterface < T > nextNode = nodeStack.pop ();
-                assert nextNode != null; // since nodeStack was not empty
-                // before the pop
-                System.out.println (nextNode.getData ());
-                currentNode = nextNode.getRightChild ();
-            } // end if
-        } // end while
-    } 
-
-    /**
-     *  internal iterator
-     */
-    private class InorderIterator implements Iterator<T>
-    {
-        private Stack<BinaryNodeInterface<T>> nodeStack;
-        private BinaryNodeInterface < T > currentNode;
-
-        /**
-         *  default constructor
-         */
-        public InorderIterator ()
-        {
-            nodeStack = new Stack< BinaryNodeInterface<T>>();
-            currentNode = root;
+        // your code here
+        //testing
+        ///*
+//        for(int i = 0; i < dataArray.length; i++) {
+//            System.out.println(dataArray[i].getData() + " occured " +
+//                    dataArray[i].getOccurances() + " times");
+//        }
+        //*/
+        BinaryNodeInterface<HuffmanData<T>>[] nodes = new BinaryNode[dataArray.length];
+        for (int i = 0; i < dataArray.length; i++) {
+            nodes[i] = new BinaryNode(dataArray[i]);
         }
-
-        /**
-         * returns true if there is a next element; false otherwise
-         * @return true if there is a next element; false otherwise
-         */
-        public boolean hasNext ()
-        {
-            return !nodeStack.isEmpty () || (currentNode != null);
-        }
-
-        /**
-         * returns the next element and moves forward
-         * @return the next element
-         */
-        public T next ()
-        {
-            BinaryNodeInterface < T > nextNode = null;
-            // find leftmost node with no left child
-            while (currentNode != null)
-            {
-                nodeStack.push (currentNode);
-                currentNode = currentNode.getLeftChild ();
-            } // end while
-            // get leftmost node, then move to its right subtree
-            if (!nodeStack.isEmpty ())
-            {
-                nextNode = nodeStack.pop ();
-                assert nextNode != null; // since nodeStack was not empty
-                // before the pop
-                currentNode = nextNode.getRightChild ();
+        
+        //constructing tree -- not finished
+        //*UPDATE* tree finished
+        for(int i = 0; i < nodes.length - 1; i ++) {
+            BinaryNode temp = new BinaryNode(new HuffmanData(null, 
+                    nodes[i].getData().getOccurances() + 
+                            nodes[i + 1].getData().getOccurances()));
+            //takes off two lowest and adds to temp
+            temp.setLeftChild(nodes[i]);
+            temp.setRightChild(nodes[i + 1]);
+            leafCount += 2;
+            //just get rid of the the i'th node just for organizational purposes
+            nodes[i] = null;
+            nodes[i + 1] = null;
+            //holder will compare frequencies of temp and node after i + 1
+            int holder = i + 2;
+            //will move nodes the appropriate amount
+            while(holder < nodes.length &&((HuffmanData)temp.getData()).getOccurances() 
+                    > nodes[holder].getData().getOccurances()) {
+                nodes[holder - 1] = nodes[holder];
+                holder++;
             }
-            else
-                throw new NoSuchElementException ();
-            return nextNode.getData ();
-        } // end next
-
-        /**
-         * unsupported
-         */
-        public void remove ()
-        {
-            throw new UnsupportedOperationException ();
+            //place the new subtree with the [i] and [i + 1] nodes into appropriate place
+            nodes[holder - 1] = temp;
+            //at the end it will be a 128 array and at the last index contatin the root
         }
+        /*So now the array contains one node, at the last index, 
+        holding everything else*/
+        this.setRootNode(nodes[nodes.length - 1]);
+        //hell yeah! got the HuffmanTree working, now just character representation
+        //now the HuffmanTree contains a root node which contatins everything else.
+        
+        keyMap = new TreeMap<String, T>();
+        codeMap = new TreeMap<T,String>();
+        setMaps(getRootNode(), "");
+    }
+    
+     /** 
+      * set up the 2 maps
+      * @param node
+      * @param codeString
+      */
+     private void setMaps(BinaryNodeInterface<HuffmanData<T>> node,
+             String codeString)
+     { 
+         if(node.hasLeftChild()){
+            setMaps(node.getLeftChild(), codeString + "0");
+         }
+         if(node.hasRightChild()) {
+            setMaps(node.getRightChild(), codeString + "1");
+         }
+         if(node.isLeaf()) {
+            keyMap.put(codeString, node.getData().getData());
+            codeMap.put(node.getData().getData(), codeString);
+            //System.out.println(node.getData().getData() + " is " + codeString);
+            codeString = codeString.substring(0, codeString.length() - 1);
+         }
+     }
+    /** 
+     * creates two new HuffmanTrees and adds them to the root of this tree
+     * @param left 
+     * @param rightt
+     */
+    private void add(BinaryNode<HuffmanData<T>> left,
+            BinaryNode<HuffmanData<T>> right)
+    {
+         HuffmanTree<T> leftTree = new HuffmanTree<T>();
+         leftTree.setRootNode(left); 
+         HuffmanTree<T> rightTree = new HuffmanTree<T>();
+         rightTree.setRootNode(right);
+         setTree(new HuffmanData<T>
+                 (MARKER, left.getData().getOccurances()
+                 + right.getData().getOccurances()), leftTree, rightTree);
+    }
+    
+    /** 
+     * adds 2 new elements to this tree<br>
+     *  smaller on the left
+     * @param element1
+     * @param element2
+     */
+    private void firstAdd(HuffmanData<T> element1, HuffmanData<T> element2)
+    {
 
     }
+    
+    /** 
+     * add a single element to the tree
+     *  smaller on the left
+     * @param element1
+     */
+     private void add(HuffmanData<T> element1)
+     {
+         
+     }
+    
+    /*
+     * accessor for codeMap
+     * @ return codeMap
+     */
+    public SortedMap<T, String> getCodeMap()
+    {
+        return codeMap;
+    }
+    
+    /*
+     * accessor for keyMap
+     * @ return keyMap
+     */
+    public SortedMap<String, T> getKeyMap()
+    {
+        return keyMap;
+    }
 
-   /**
-    * returns a new iterator over the class
-    * @return a new iterator
-    */
-   public InorderIterator getInOrderIterator()
-   {
-       return new InorderIterator();
-   }
 }
-
